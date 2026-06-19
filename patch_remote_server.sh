@@ -98,12 +98,34 @@ EOF
 
 chmod +x "$SERVER_DIR/bin/antigravity-ide-server"
 
-# Step 7: Clear Gatekeeper quarantine tags and apply ad-hoc local code signatures
+# Step 7: Copy macOS language server binary from local IDE application installation if present
+echo "Locating macOS language server binary..."
+if [ "$ARCH" = "arm64" ]; then
+  LS_BINARY="language_server_macos_arm"
+else
+  LS_BINARY="language_server_macos_x64"
+fi
+
+LOCAL_APP_PATH="/Applications/Antigravity IDE.app/Contents/Resources/app/extensions/antigravity/bin/$LS_BINARY"
+USER_APP_PATH="$HOME/Applications/Antigravity IDE.app/Contents/Resources/app/extensions/antigravity/bin/$LS_BINARY"
+
+if [ -f "$LOCAL_APP_PATH" ]; then
+  echo "Found language server binary at $LOCAL_APP_PATH. Copying..."
+  cp "$LOCAL_APP_PATH" "$SERVER_DIR/extensions/antigravity/bin/$LS_BINARY"
+elif [ -f "$USER_APP_PATH" ]; then
+  echo "Found language server binary at $USER_APP_PATH. Copying..."
+  cp "$USER_APP_PATH" "$SERVER_DIR/extensions/antigravity/bin/$LS_BINARY"
+else
+  echo "Warning: Could not find language server binary $LS_BINARY in standard IDE paths."
+  echo "You may need to manually copy it to: $SERVER_DIR/extensions/antigravity/bin/$LS_BINARY"
+fi
+
+# Step 8: Clear Gatekeeper quarantine tags and apply ad-hoc local code signatures
 echo "Applying ad-hoc code signatures..."
 xattr -rc "$SERVER_DIR"
 
 # Find and codesign the binary executables & modules to satisfy macOS Gatekeeper policies
-find "$SERVER_DIR" -type f \( -name "*.node" -o -name "rg" -o -name "spawn-helper" -o -name "node" \) | while read -r file; do
+find "$SERVER_DIR" -type f \( -name "*.node" -o -name "rg" -o -name "spawn-helper" -o -name "node" -o -name "language_server_macos_*" \) | while read -r file; do
   if [ -f "$file" ]; then
     echo "Signing $file..."
     codesign --force --sign - "$file"

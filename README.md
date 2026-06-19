@@ -25,6 +25,7 @@ This script builds a **hybrid macOS IDE server** directly on your remote Mac:
 3. **Native Compilation**: Compiles the native modules (`@vscode/spdlog`, `@parcel/watcher`, `node-pty`, `native-watchdog`, `kerberos`, and `@vscode/ripgrep`) natively in a temporary folder using the remote Mac's Xcode/CommandLineTools (`clang`).
 4. **Startup Configuration**: Patches the startup script (`antigravity-ide-server`) to export `DYLD_LIBRARY_PATH` (including Homebrew library paths like `/opt/homebrew/lib`).
 5. **Code Signing**: Clears macOS Gatekeeper quarantine tags and dynamically signs the compiled binaries and `.node` bundles with local ad-hoc signatures (`codesign`) to prevent launch failures.
+6. **Language Server Setup**: Locates the native macOS language server binary from your local IDE installation (automatically checking standard paths like `/Applications/Antigravity IDE.app`) and copies it to the server's extension directory so that agentic features function correctly.
 
 ---
 

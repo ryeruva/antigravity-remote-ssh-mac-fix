@@ -1,30 +1,30 @@
-# Remote SSH to Apple Silicon Mac (darwin-arm64) Fix for Antigravity IDE
+# Remote SSH to macOS (Apple Silicon / Intel) Fix for Antigravity IDE
 
-A workaround script to resolve Remote SSH connection failures when connecting to an Apple Silicon Mac (`darwin-arm64` / macOS) from the Antigravity IDE.
+A workaround script to resolve Remote SSH connection failures when connecting to a macOS host (`darwin-arm64` / `darwin-x64`) from the Antigravity IDE.
 
 ---
 
 ## The Problem
 
-When attempting to connect to a remote Apple Silicon Mac (e.g., M1/M2/M3/M4 Mac mini or MacBook) via the **Remote - SSH** extension, the connection setup fails. 
+When attempting to connect to a remote Mac (e.g., Mac mini or MacBook) via the **Remote - SSH** extension, the connection setup fails. 
 
 In the remote agent logs, you will see errors like:
 ```text
 An error occurred while starting the server, with exit code: 1
 /Users/username/.antigravity-ide-server/bin/.../bin/antigravity-ide-server: line 25: /node: No such file or directory
 ```
-or `404 Not Found` errors in the IDE console while downloading the server package. This happens because the Antigravity IDE release servers do not distribute a `darwin-arm` package for the remote server component.
+or `404 Not Found` errors in the IDE console while downloading the server package. This happens because the Antigravity IDE release servers do not distribute a `darwin-arm64` or `darwin-x64` package for the remote server component.
 
 ---
 
 ## The Solution
 
-This script builds a **hybrid macOS ARM64 IDE server** directly on your remote Mac:
+This script builds a **hybrid macOS IDE server** directly on your remote Mac:
 1. **Skeleton Extraction**: Downloads the platform-agnostic JS structure from the `linux-arm` package release.
-2. **Interpreter Replacement**: Swaps the Linux `node` binary with a native macOS arm64 `node` binary.
-3. **Native Compilation**: Compiles the native modules (`@vscode/spdlog`, `@parcel/watcher`, `node-pty`, `native-watchdog`, `kerberos`, and `@vscode/ripgrep`) natively using the remote Mac's Xcode/CommandLineTools (`clang`).
+2. **Interpreter Replacement**: Swaps the Linux `node` binary with a native macOS `node` binary (automatically detecting if the host is Apple Silicon `arm64` or Intel `x86_64`).
+3. **Native Compilation**: Compiles the native modules (`@vscode/spdlog`, `@parcel/watcher`, `node-pty`, `native-watchdog`, `kerberos`, and `@vscode/ripgrep`) natively in a temporary folder using the remote Mac's Xcode/CommandLineTools (`clang`).
 4. **Startup Configuration**: Patches the startup script (`antigravity-ide-server`) to export `DYLD_LIBRARY_PATH` (including Homebrew library paths like `/opt/homebrew/lib`).
-5. **Code Signing**: Clears macOS Gatekeeper quarantine tags and signs the compiled binaries and `.node` bundles with local ad-hoc signatures (`codesign`) to prevent launch failures.
+5. **Code Signing**: Clears macOS Gatekeeper quarantine tags and dynamically signs the compiled binaries and `.node` bundles with local ad-hoc signatures (`codesign`) to prevent launch failures.
 
 ---
 

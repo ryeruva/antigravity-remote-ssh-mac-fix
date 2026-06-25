@@ -5,7 +5,7 @@ set -e
 # --- Configuration ---
 # The commit ID of the Antigravity IDE version.
 # Change this to match your IDE version if it is different.
-COMMIT_ID="2.0.4-def9583aef9852ff94cb0dea16ede9bb6b095b30"
+COMMIT_ID="2.1.1-e0b7a2bcf575cfba10528c4e7c10bd3ce2d7769a"
 NODE_VERSION="v22.20.0"
 
 echo "=== Initializing setup on macOS remote host ==="
